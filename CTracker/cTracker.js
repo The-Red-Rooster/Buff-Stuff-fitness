@@ -1,32 +1,29 @@
-// Storage Controller
-
-
 // Item Controller
-const ItemCtrl = (function () {
+const foodEntryFunct = (function () {
     // Item Constructor
-    const Item = function (id, name, calories) {
-        this.id = id;
+    const Food = function (val, name, calories) {
+        this.val = val;
         this.name = name;
         this.calories = calories;
     }
 
     // Data Structure / State
-    const data = {
-        items: [/* Example ID: {id: 0, name: 'Steak Dinner', calories: 1200},*/],
+    const foodStruct = {
+        foodArr: [],
         currentItem: null,
-        totalCalories: 0
+        totalCals: 0
     }
 
     // Public methods
     return {
-        getItems: function () {
-            return data.items;
+        getFood: function () {
+            return foodStruct.foodArr;
         },
-        addItem: function (name, calories) {
+        addFood: function (name, calories) {
             let ID;
             // Create ID
-            if (data.items.length > 0) {
-                ID = data.items[data.items.length - 1].id + 1;
+            if (foodStruct.foodArr.length > 0) {
+                ID = foodStruct.foodArr[foodStruct.foodArr.length - 1].id + 1;
             } else {
                 ID = 0;
             }
@@ -35,38 +32,36 @@ const ItemCtrl = (function () {
             calories = parseInt(calories);
 
             // Create new item
-            newItem = new Item(ID, name, calories);
+            newFood = new Food(ID, name, calories);
 
             // Add to items array
-            data.items.push(newItem);
+            foodStruct.foodArr.push(newFood);
 
-            return newItem;
+            return newFood;
         },
         getTotalCalories: function () {
             let total = 0;
 
             // Loop through items and add cals
-            data.items.forEach(function (item) {
+            foodStruct.foodArr.forEach(function (item) {
                 total += item.calories;
             });
 
             // Set total cal in data structure
-            data.totalCalories = total;
+            foodStruct.totalCals = total;
 
             // Return total
-            return data.totalCalories;
+            return foodStruct.totalCals;
         },
         logData: function () {
-            return data;
+            return foodStruct;
         }
     }
 })();
 
-
-
 // UI Controller -------------------------------------------
-const UICtrl = (function () {
-    const UISelectors = {
+const interfaceFunct = (function () {
+    const interfaceElements = {
         itemList: '#item-list',
         addBtn: '.add-btn',
         itemNameInput: '#item-name',
@@ -80,80 +75,77 @@ const UICtrl = (function () {
             let html = '';
 
             items.forEach(function (item) {
-                html += `<li class="collection-item" id="item-${item.id}">
+                html += `<li class="collection-item" id="item-${item.val}">
                 <strong><h6>${item.name}:</h6> </strong> <em> ${item.calories} Calories</em>`
             });
 
             // Insert list items
-            document.querySelector(UISelectors.itemList).innerHTML = html;
+            document.querySelector(interfaceElements.itemList).innerHTML = html;
         },
         getItemInput: function () {
             return {
-                name: document.querySelector(UISelectors.itemNameInput).value,
-                calories: document.querySelector(UISelectors.itemCaloriesInput).value
+                name: document.querySelector(interfaceElements.itemNameInput).value,
+                calories: document.querySelector(interfaceElements.itemCaloriesInput).value
             }
         },
         addListItem: function (item) {
             // Show the list
-            document.querySelector(UISelectors.itemList).style.display = 'block';
+            document.querySelector(interfaceElements.itemList).style.display = 'block';
             // Create li element
             const li = document.createElement('li');
             // Add class
             li.className = 'collection-item';
             // Add ID
-            li.id = `item-${item.id}`;
+            li.id = `item-${item.val}`;
             // Add HTML
             li.innerHTML = `<strong><h6>${item.name}:</h6> </strong> <em>${item.calories} Calories</em>`;
             // Insert item
-            document.querySelector(UISelectors.itemList).insertAdjacentElement('beforeend', li)
+            document.querySelector(interfaceElements.itemList).insertAdjacentElement('beforeend', li)
         },
         clearInput: function () {
-            document.querySelector(UISelectors.itemNameInput).value = '';
-            document.querySelector(UISelectors.itemCaloriesInput).value = '';
+            document.querySelector(interfaceElements.itemNameInput).value = '';
+            document.querySelector(interfaceElements.itemCaloriesInput).value = '';
         },
         hideList: function () {
-            document.querySelector(UISelectors.itemList).style.display = 'none';
+            document.querySelector(interfaceElements.itemList).style.display = 'none';
         },
         showTotalCalories: function (totalCalories) {
-            document.querySelector(UISelectors.totalCalories).textContent = totalCalories;
+            document.querySelector(interfaceElements.totalCalories).textContent = totalCalories;
         },
         getSelectors: function () {
-            return UISelectors;
+            return interfaceElements;
         }
     }
 })();
 
 // App Controller
-const App = (function (ItemCtrl, UICtrl) {
+const App = (function (foodEntryFunct, interfaceFunct) {
     // Load event listeners
     const loadEventListeners = function () {
-        // Get UI selectors
-        const UISelectors = UICtrl.getSelectors();
-
-        // Add item event
+        const UISelectors = interfaceFunct.getSelectors();
         document.querySelector(UISelectors.addBtn).addEventListener('click', itemAddSubmit);
     }
 
     // Add item submit
     const itemAddSubmit = function (e) {
         // Get form input from UI Controller
-        const input = UICtrl.getItemInput();
+        const input = interfaceFunct.getItemInput();
 
         // Check for name and calorie input
         if (input.name !== '' && input.calories !== '') {
             // Add item
-            const newItem = ItemCtrl.addItem(input.name, input.calories);
+            const newItem = foodEntryFunct.addFood(input.name, input.calories);
 
             // Add item to UI list
-            UICtrl.addListItem(newItem);
+            interfaceFunct.addListItem(newItem);
 
             // Get total calories
-            const totalCalories = ItemCtrl.getTotalCalories();
+            const totalCalories = foodEntryFunct.getTotalCalories();
             // Add total calories to UI
-            UICtrl.showTotalCalories(totalCalories);
+            interfaceFunct.showTotalCalories(totalCalories);
 
             // Clear fields
-            UICtrl.clearInput();
+            interfaceFunct.clearInput();
         }
 
         e.preventDefault();
@@ -163,27 +155,27 @@ const App = (function (ItemCtrl, UICtrl) {
     return {
         init: function () {
             // Fetch items from data structure
-            const items = ItemCtrl.getItems();
+            const items = foodEntryFunct.getFood();
 
             // Check if any items
             if (items.length === 0) {
-                UICtrl.hideList();
+                interfaceFunct.hideList();
             } else {
                 // Populate list with items
-                UICtrl.populateItemList(items);
+                interfaceFunct.populateItemList(items);
             }
 
             // Get total calories
-            const totalCalories = ItemCtrl.getTotalCalories();
+            const totalCalories = foodEntryFunct.getTotalCalories();
             // Add total calories to UI
-            UICtrl.showTotalCalories(totalCalories);
+            interfaceFunct.showTotalCalories(totalCalories);
 
             // Load event listeners
             loadEventListeners();
         }
     }
 
-})(ItemCtrl, UICtrl);
+})(foodEntryFunct, interfaceFunct);
 
 // Initialize App
 App.init();
